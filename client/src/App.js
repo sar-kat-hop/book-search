@@ -36,11 +36,8 @@ function App() {
           {/* </> */}
         </Routes>
       </Router>
-
-
-
     </ApolloProvider>
-  )
+  );
 }
 
 // function App() {
