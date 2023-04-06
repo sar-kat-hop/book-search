@@ -11,7 +11,10 @@ const typeDefs = gql`
         title: String
     }
 
-    type: 
+    type: User {
+        _id: ID
+        
+    }
 
 `;
 
