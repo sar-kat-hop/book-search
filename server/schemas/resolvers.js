@@ -8,7 +8,7 @@ const resolvers = {
             return User.find()
                 .populate('savedBooks')
         },
-        user: async (parent, { userId }) => {
+        user: async (_, { userId }) => {
             return User.find({ _id: userId })
                 .populate('savedBooks')
         },
@@ -18,7 +18,7 @@ const resolvers = {
     },
 
     Mutation: {
-        addUser: async( parent, { username, email, password }) => {
+        addUser: async( _, { username, email, password }) => {
             const user = await User.create({ username, email, password });
 
             const token = signToken(user);
@@ -26,7 +26,7 @@ const resolvers = {
             return { token, user };
         },
 
-        login: async( parent, { email, password }) => {
+        login: async( _, { email, password }) => {
             const user = await User.findOne({ email });
 
             if(!user) {
@@ -44,15 +44,41 @@ const resolvers = {
             return { token, user };
         },
 
-        saveBook: async ( parent, {}, context ) -> {
-            if(context.user) {
-                const book = await Book.findOneAndUpdate(
-                    { _id: bookId },
-                    {
-                        $addToSet: { }
-                    }
-                )
+        saveBook: async (_, { bookId }, context ) => {
+            if (context.user) {
+                const book = await Book.findById(bookId);
+                user.savedbooks.addToSet(bookId);
+                await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $pull: { savedBooks: book.bookId }}
+                );
+
+                return book;
+
+            } else {
+                if (!context.user) {
+                    throw new AuthenticationError('Please log in to save a book to your account.')
+                }
             }
-        }
-    }
-}
+        },
+
+        removeBook: async ( _, { bookId }, context ) => {
+            if(context.user) {
+                const currentUser = await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $pull: { savedBooks: bookId } },
+                    { new: true }
+                );
+
+                return currentUser;
+
+            } else {
+                if(!context.user) {
+                    throw new AuthenticationError('Please log in to remove a book from your account.')
+                }
+            }
+        },
+    },
+};
+
+module.exports = resolvers;

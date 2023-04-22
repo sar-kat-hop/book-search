@@ -24,7 +24,7 @@ const typeDefs = gql`
         user(userId: ID!): [User]!
 
         books: [Book]!
-        // book(bookID: String!)[Book]!
+        book(bookID: String!)[Book]!
     }
 
     type Auth {
